@@ -3,29 +3,25 @@ const bodyParser = require('koa-bodyparser');
 const TelegramBot = require('node-telegram-bot-api');
 
 const CoinMarketCalendarClient = require('./Coinmarketcal');
-const Cache = require('./Cache');
 
-const pkgName = require('./package.json').name;
 const {
   clientId,
   clientSecret,
-  telegramToken
+  telegramToken,
 } = require('./secrets.json');
 
 const app = new Koa();
 const bot = new TelegramBot(telegramToken);
 const coinmarketcalApi = new CoinMarketCalendarClient({
   clientId,
-  clientSecret
+  clientSecret,
 });
-
-const lastMessage = {}
 
 function printEvents(events) {
   return events.map((event) => {
     const {
       title,
-      description
+      description,
     } = event;
 
     const date = new Date(event.date_event).toLocaleDateString('en-US', {
@@ -35,23 +31,10 @@ function printEvents(events) {
       day: 'numeric',
     });
 
-    const validity = event.percentage;
-
-    const coin = event.coins
-      .filter(({
-        id
-      }) => id !== 'custom_coin')
-      .map(({
-        symbol
-      }) => symbol)
-      .join(', ');
-
-    const type = event.categories.map(category => category.name).join(', ');
-
-    return date + '\n' +
-      title + '\n' +
-      description + '\n'
-  }).join("\n");
+    return `${date}\n${
+      title}\n${
+      description}\n`;
+  }).join('\n');
 }
 
 
@@ -83,7 +66,7 @@ async function getCategoryIdsFromNames(categoryNames) {
 
 async function fetchEvents({
   coinSymbols = [],
-  categoryNames = []
+  categoryNames = [],
 }) {
   const [categoryIds, coinIds] = await Promise.all([
     getCategoryIdsFromNames(categoryNames),
@@ -92,71 +75,69 @@ async function fetchEvents({
 
   const events = await coinmarketcalApi.getEvents({
     coins: coinIds,
-    categories: categoryIds
+    categories: categoryIds,
   });
 
   if (events && Array.isArray(events) && events.length > 0) {
     return printEvents(events);
-  } else {
-    return 'No events found';
   }
+  return 'No events found';
 }
-
 
 
 app.use(bodyParser());
 
-app.use(async ctx => {
-  if (ctx.request.path == `/`) {
+app.use(async (ctx) => {
+  if (ctx.request.path === '/') {
     bot.processUpdate(ctx.request.body);
   }
   ctx.status = 200;
   ctx.body = {
-    status: 'success'
-  }
+    status: 'success',
+  };
 });
 
 
 function sendCoinNews(msg) {
   try {
-    const symbols = msg.text.toUpperCase().split(" ");
+    const symbols = msg.text.toUpperCase().split(' ');
     fetchEvents({
-      coinSymbols: symbols
+      coinSymbols: symbols,
     }).then((message) => {
       bot.sendMessage(msg.chat.id, message);
     });
   } catch (e) {
-    bot.sendMessage(msg.chat.id, "Something went wrong");
+    bot.sendMessage(msg.chat.id, 'Something went wrong');
     console.log(e);
   }
 }
 
 
 function sendStartMessage(msg) {
-  bot.sendMessage(msg.chat.id, "Enter a coin symbol to get its news. For example: omg");
+  bot.sendMessage(msg.chat.id, 'Enter a coin symbol to get its news. For example: omg');
 }
 
 
 function sendAboutMessage(msg) {
-  bot.sendMessage(msg.chat.id, "v0.0.1. Created by Nishanth Vijayan.");
+  bot.sendMessage(msg.chat.id, 'v0.0.1. Created by Nishanth Vijayan.');
 }
 
 
-bot.on('message', msg => {
+bot.on('message', (msg) => {
   console.log(msg);
 
-  if (msg.text.startsWith("/start")) {
+  if (msg.text.startsWith('/start')) {
     sendStartMessage(msg);
-  } else if (msg.text.startsWith("/")) {
-    sendAboutMessage(msg)
-  } else if (msg.text.startsWith("/about")) {
-    bot.sendMessage(msg.chat.id, "Unknown command");
+  } else if (msg.text.startsWith('/')) {
+    sendAboutMessage(msg);
+  } else if (msg.text.startsWith('/about')) {
+    bot.sendMessage(msg.chat.id, 'Unknown command');
   } else {
     sendCoinNews(msg);
   }
 });
 
-var port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`listening to port ${port}`);
 });
