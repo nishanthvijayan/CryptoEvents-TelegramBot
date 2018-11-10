@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const axios = require('axios');
-const Cache = require('./Cache');
+const cache = require('memory-cache');
 
 const WEEK_IN_MS = (7 * 24 * 60 * 60 * 1000);
 
@@ -9,13 +9,12 @@ module.exports = class CoinMarketCalendarClient {
   constructor({ clientId, clientSecret }) {
     this.clientId = clientId;
     this.clientSecret = clientSecret;
-    this.cache = new Cache();
     this.accessToken = null;
   }
 
 
   async authenticate() {
-    const cachedAccessToken = this.cache.get('access_token');
+    const cachedAccessToken = cache.get('access_token');
     if (cachedAccessToken) {
       this.accessToken = cachedAccessToken;
       return;
@@ -34,7 +33,7 @@ module.exports = class CoinMarketCalendarClient {
 
       if (authResponse.data && authResponse.data.access_token) {
         this.accessToken = authResponse.data.access_token;
-        this.cache.set('access_token', this.accessToken, authResponse.data.expires_in * 1000);
+        cache.put('access_token', this.accessToken, authResponse.data.expires_in * 1000);
       }
     } catch (e) {
       if (e.response && e.response.status === 400) {
@@ -50,7 +49,7 @@ module.exports = class CoinMarketCalendarClient {
 
   async getCoins() {
     // If cache has fresh,non-empty coin list, return that.
-    const cachedCoinList = this.cache.get('coins');
+    const cachedCoinList = cache.get('coins');
     if (cachedCoinList && Array.isArray(cachedCoinList) && cachedCoinList.length > 0) {
       return cachedCoinList;
     }
@@ -72,14 +71,14 @@ module.exports = class CoinMarketCalendarClient {
       const coins = response.data;
 
       if (coins && Array.isArray(coins) && coins.length > 0) {
-        this.cache.set('coins', coins, WEEK_IN_MS);
+        cache.put('coins', coins, WEEK_IN_MS);
         return coins;
       }
     } catch (e) {
       if (e.response && e.response.status === 401) {
         console.log('Authentication failed. Try again.');
         this.accessToken = null;
-        this.cache.delete('access_token');
+        cache.del('access_token');
       } else if (e.code === 'ENOTFOUND') {
         console.log('Unable to connect to server. Check your internet connection');
       } else {
@@ -93,7 +92,7 @@ module.exports = class CoinMarketCalendarClient {
 
   async getCategories() {
     // If cache has fresh,non-empty category list, return that.
-    const cachedCategoryList = this.cache.get('categories');
+    const cachedCategoryList = cache.get('categories');
     if (cachedCategoryList && Array.isArray(cachedCategoryList) && cachedCategoryList.length > 0) {
       return cachedCategoryList;
     }
@@ -114,14 +113,14 @@ module.exports = class CoinMarketCalendarClient {
       const categories = response.data;
 
       if (categories && Array.isArray(categories) && categories.length > 0) {
-        this.cache.set('categories', categories, WEEK_IN_MS);
+        cache.put('categories', categories, WEEK_IN_MS);
         return categories;
       }
     } catch (e) {
       if (e.response && e.response.status === 401) {
         console.log('Authentication failed. Try again.');
         this.accessToken = null;
-        this.cache.delete('access_token');
+        cache.del('access_token');
       } else if (e.code === 'ENOTFOUND') {
         console.log('Unable to connect to server. Check your internet connection');
       } else {
@@ -162,7 +161,7 @@ module.exports = class CoinMarketCalendarClient {
       if (e.response && e.response.status === 401) {
         console.log('Authentication failed. Try again.');
         this.accessToken = null;
-        this.cache.delete('access_token');
+        cache.del('access_token');
       } else if (e.code === 'ENOTFOUND') {
         console.log('Unable to connect to server. Check your internet connection');
       } else {
