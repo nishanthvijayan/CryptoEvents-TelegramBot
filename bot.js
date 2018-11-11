@@ -33,12 +33,15 @@ const sendCoinNews = async (coinmarketcalApi, bot, msg) => {
       coins: coinIds,
     });
 
-    if (!events || !Array.isArray(events) || events.length <= 0) {
+    if (!events || !Array.isArray(events) || events.length < 1) {
       bot.sendMessage(msg.chat.id, `No events found for ${coinIds.join(', ')}`);
       return;
     }
 
-    bot.sendMessage(msg.chat.id, events.map(formatEventText).join('\n'));
+    const returnMessage = `Events & News related to ${coinIds.join(', ')}
+    \n${events.map(formatEventText).join('\n')}`;
+
+    bot.sendMessage(msg.chat.id, returnMessage);
   } catch (e) {
     bot.sendMessage(msg.chat.id, 'Something went wrong');
     console.log(e);
