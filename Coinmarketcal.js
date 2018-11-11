@@ -171,4 +171,16 @@ module.exports = class CoinMarketCalendarClient {
 
     return null;
   }
+
+  async getCoinIdsFromSymbols(coinSymbols) {
+    if (coinSymbols == null || !Array.isArray(coinSymbols) || coinSymbols.length === 0) {
+      return [];
+    }
+
+    const coinList = await this.getCoins();
+
+    return coinList
+      .filter(coin => coinSymbols.includes(coin.symbol.toUpperCase()))
+      .map(coin => coin.id);
+  }
 };
