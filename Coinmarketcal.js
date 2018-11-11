@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 const axios = require('axios');
-const cache = require('memory-cache');
 const coinsList = require('./coins.json');
 const categoriesList = require('./categories.json');
+const { Cache } = require('./cache');
 
 module.exports = class CoinMarketCalendarClient {
   constructor({ clientId, clientSecret }) {
@@ -14,7 +14,7 @@ module.exports = class CoinMarketCalendarClient {
 
 
   async authenticate() {
-    const cachedAccessToken = cache.get('access_token');
+    const cachedAccessToken = Cache.get('access_token');
     if (cachedAccessToken) {
       this.accessToken = cachedAccessToken;
       return;
@@ -33,7 +33,7 @@ module.exports = class CoinMarketCalendarClient {
 
       if (authResponse.data && authResponse.data.access_token) {
         this.accessToken = authResponse.data.access_token;
-        cache.put('access_token', this.accessToken, authResponse.data.expires_in * 1000);
+        Cache.put('access_token', this.accessToken, authResponse.data.expires_in * 1000);
       }
     } catch (e) {
       if (e.response && e.response.status === 400) {
@@ -75,7 +75,7 @@ module.exports = class CoinMarketCalendarClient {
       if (e.response && e.response.status === 401) {
         console.log('Authentication failed. Try again.');
         this.accessToken = null;
-        cache.del('access_token');
+        Cache.del('access_token');
       } else if (e.code === 'ENOTFOUND') {
         console.log('Unable to connect to server. Check your internet connection');
       } else {
