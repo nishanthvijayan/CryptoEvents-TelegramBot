@@ -13,7 +13,12 @@ class ConfigStore {
     };
 
     return dynamodb.getItem(params).promise()
-      .then(data => data.Item.key.S, (error) => {
+      .then((data) => {
+        if (data.Item) {
+          return data.Item.value.S;
+        }
+        return null;
+      }, (error) => {
         console.log(error);
         return null;
       });
@@ -33,7 +38,10 @@ class ConfigStore {
     };
 
     return dynamodb.putItem(params).promise()
-      .then(data => console.log(data), error => console.log(error));
+      .then(
+        data => console.log(`Successfully updated ${key}. Result: ${data}`),
+        error => console.log(`Put operation failed. Reason: ${error}`),
+      );
   }
 
   static del(key) {
@@ -45,7 +53,10 @@ class ConfigStore {
     };
 
     return dynamodb.deleteItem(params).promise()
-      .then(data => console.log(data), error => console.log(error));
+      .then(
+        data => console.log(`Successfully deleted ${key}. Result: ${data}`),
+        error => console.log(`deleteItem operation failed. Reason: ${error}`),
+      );
   }
 }
 
