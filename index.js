@@ -1,5 +1,4 @@
 const CoinMarketCalendarClient = require('./Coinmarketcal');
-const { startServer } = require('./server');
 const { initializeBot } = require('./bot');
 
 const {
@@ -16,4 +15,12 @@ const coinmarketcalApi = new CoinMarketCalendarClient({
 
 const bot = initializeBot(telegramToken, coinmarketcalApi);
 
-startServer(bot);
+exports.handler = async (event) => {
+    console.log(event);
+    bot.processUpdate(event);
+
+    return {
+        statusCode: 200,
+        body: 'success',
+    };
+};

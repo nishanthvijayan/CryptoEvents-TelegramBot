@@ -12,8 +12,6 @@
   "dependencies": {
     "aws-sdk": "^2.353.0",
     "axios": "^0.18.0",
-    "koa": "^2.5.1",
-    "koa-bodyparser": "^4.2.1",
     "node-telegram-bot-api": "^0.30.0"
   },
   "devDependencies": {
