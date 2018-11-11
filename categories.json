@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "name": "Release"
+    },
+    {
+        "id": 2,
+        "name": "Rebranding"
+    },
+    {
+        "id": 3,
+        "name": "Burn"
+    },
+    {
+        "id": 4,
+        "name": "Exchange"
+    },
+    {
+        "id": 5,
+        "name": "Conference"
+    },
+    {
+        "id": 6,
+        "name": "Community Event"
+    },
+    {
+        "id": 7,
+        "name": "Other"
+    },
+    {
+        "id": 8,
+        "name": "Airdrop"
+    },
+    {
+        "id": 9,
+        "name": "AMA/Q&A"
+    },
+    {
+        "id": 10,
+        "name": "Announcement/News"
+    },
+    {
+        "id": 11,
+        "name": "Partnership"
+    },
+    {
+        "id": 12,
+        "name": "Halving"
+    },
+    {
+        "id": 13,
+        "name": "Roadmap"
+    },
+    {
+        "id": 14,
+        "name": "Fork/Swap"
+    },
+    {
+        "id": 15,
+        "name": "Whitepaper"
+    }
+]

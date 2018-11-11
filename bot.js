@@ -19,7 +19,7 @@ const formatEventText = (event) => {
     description}\n`;
 };
 
-const sendCoinNews = async (coinmarketcalApi, bot, msg) => {
+const sendCoinNews = async (bot, msg, coinmarketcalApi) => {
   try {
     const symbols = msg.text.toUpperCase().split(' ');
     const coinIds = await coinmarketcalApi.getCoinIdsFromSymbols(symbols);
@@ -57,7 +57,6 @@ const sendAboutMessage = (bot, msg) => {
     \nThis bot is open-source. You'll find its source code at:
     \nhttps://github.com/nishanthvijayan/CryptoEvents-TelegramBot
     \nIf you found this bot useful, don't forget to star the project :)
-    \n
     \nPlease direct your complaints & feedback to nishanthvijayan1995@gmail.com
   `);
 };
@@ -75,7 +74,7 @@ const initializeBot = (telegramToken, coinmarketcalApi) => {
     } else if (msg.text.startsWith('/about')) {
       sendAboutMessage(bot, msg);
     } else {
-      sendCoinNews(coinmarketcalApi, bot, msg);
+      sendCoinNews(bot, msg, coinmarketcalApi);
     }
   });
 
