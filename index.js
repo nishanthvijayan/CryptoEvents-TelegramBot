@@ -1,5 +1,6 @@
 const CoinMarketCalendarClient = require('./Coinmarketcal');
-const { initializeBot } = require('./bot');
+const { initializeResponseHandler } = require('./bot');
+const axios = require('axios');
 
 const {
   clientId,
@@ -13,14 +14,21 @@ const coinmarketcalApi = new CoinMarketCalendarClient({
   clientSecret,
 });
 
-const bot = initializeBot(telegramToken, coinmarketcalApi);
+const RESPONSE_URL = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+const responseHandler = initializeResponseHandler(coinmarketcalApi);
 
 exports.handler = async (event) => {
-    console.log(event);
-    bot.processUpdate(event);
+  const messageText = event.message.text;
+  const chatId = event.message.chat.id;
+  const responseMsg = {
+    text: responseHandler(messageText),
+    chat_id: chatId,
+  };
 
-    return {
-        statusCode: 200,
-        body: 'success',
-    };
+  await axios.post(RESPONSE_URL, responseMsg);
+
+  return {
+    statusCode: 200,
+    body: 'success',
+  };
 };

@@ -1,4 +1,3 @@
-const TelegramBot = require('node-telegram-bot-api');
 const { version } = require('./package.json');
 
 const formatEventText = (event) => {
@@ -19,14 +18,13 @@ const formatEventText = (event) => {
     description}\n`;
 };
 
-const sendCoinNews = async (bot, msg, coinmarketcalApi) => {
+const sendCoinNews = async (messageText, coinmarketcalApi) => {
   try {
-    const symbols = msg.text.toUpperCase().split(' ');
+    const symbols = messageText.toUpperCase().split(' ');
     const coinIds = await coinmarketcalApi.getCoinIdsFromSymbols(symbols);
 
     if (coinIds.length === 0) {
-      bot.sendMessage(msg.chat.id, 'Unknown symbol. Please enter a valid trade symbol');
-      return;
+      return 'Unknown symbol. Please enter a valid trade symbol';
     }
 
     const events = await coinmarketcalApi.getEvents({
@@ -34,54 +32,41 @@ const sendCoinNews = async (bot, msg, coinmarketcalApi) => {
     });
 
     if (!events || !Array.isArray(events) || events.length < 1) {
-      bot.sendMessage(msg.chat.id, `No events found for ${coinIds.join(', ')}`);
-      return;
+      return `No events found for ${coinIds.join(', ')}`;
     }
 
     const returnMessage = `Events & News related to ${coinIds.join(', ')}
     \n${events.map(formatEventText).join('\n')}`;
 
-    bot.sendMessage(msg.chat.id, returnMessage);
+    return returnMessage;
   } catch (e) {
-    bot.sendMessage(msg.chat.id, 'Something went wrong');
     console.log(e);
+    return 'Something went wrong';
   }
 };
 
-const sendStartMessage = (bot, msg) => {
-  bot.sendMessage(msg.chat.id, 'Enter a coin symbol to get its news. For example: BCH');
-};
+const sendStartMessage = () => 'Enter a coin symbol to get its news. For example: BCH';
 
-const sendAboutMessage = (bot, msg) => {
-  bot.sendMessage(msg.chat.id, `v${version}. Created by Nishanth Vijayan.
+const sendAboutMessage = () => `v${version}. Created by Nishanth Vijayan.
     \nThis bot is open-source. You'll find its source code at:
     \nhttps://github.com/nishanthvijayan/CryptoEvents-TelegramBot
     \nIf you found this bot useful, don't forget to star the project :)
     \nPlease direct your complaints & feedback to nishanthvijayan1995@gmail.com
-  `);
-};
+  `;
 
-const initializeBot = (telegramToken, coinmarketcalApi) => {
-  const bot = new TelegramBot(telegramToken);
-
-  bot.on('message', (msg) => {
-    console.log(msg);
-
-    if (msg.text.startsWith('/start')) {
-      sendStartMessage(bot, msg);
-    } else if (msg.text.startsWith('/')) {
-      sendAboutMessage(bot, msg);
-    } else if (msg.text.startsWith('/about')) {
-      sendAboutMessage(bot, msg);
-    } else {
-      sendCoinNews(bot, msg, coinmarketcalApi);
-    }
-  });
-
-  return bot;
+const initializeResponseHandler = coinmarketcalApi => (messageText) => {
+  if (messageText.startsWith('/start')) {
+    sendStartMessage();
+  } else if (messageText.startsWith('/')) {
+    sendAboutMessage();
+  } else if (messageText.startsWith('/about')) {
+    sendAboutMessage();
+  } else {
+    sendCoinNews(messageText, coinmarketcalApi);
+  }
 };
 
 module.exports = {
-  initializeBot,
+  initializeResponseHandler,
 };
 
