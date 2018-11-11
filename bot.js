@@ -53,7 +53,13 @@ const sendStartMessage = (bot, msg) => {
 };
 
 const sendAboutMessage = (bot, msg) => {
-  bot.sendMessage(msg.chat.id, `v${version}. Created by Nishanth Vijayan.`);
+  bot.sendMessage(msg.chat.id, `v${version}. Created by Nishanth Vijayan.
+    \nThis bot is open-source. You'll find its source code at:
+    \nhttps://github.com/nishanthvijayan/CryptoEvents-TelegramBot
+    \nIf you found this bot useful, don't forget to star the project :)
+    \n
+    \nPlease direct your complaints & feedback to nishanthvijayan1995@gmail.com
+  `);
 };
 
 const initializeBot = (telegramToken, coinmarketcalApi) => {
