@@ -21,7 +21,7 @@ exports.handler = async (event) => {
   const messageText = event.message.text;
   const chatId = event.message.chat.id;
   const responseMsg = {
-    text: responseHandler(messageText),
+    text: (await responseHandler(messageText)),
     chat_id: chatId,
   };
 

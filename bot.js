@@ -18,7 +18,7 @@ const formatEventText = (event) => {
     description}\n`;
 };
 
-const sendCoinNews = async (messageText, coinmarketcalApi) => {
+const getCoinNews = async (messageText, coinmarketcalApi) => {
   try {
     const symbols = messageText.toUpperCase().split(' ');
     const coinIds = await coinmarketcalApi.getCoinIdsFromSymbols(symbols);
@@ -45,25 +45,23 @@ const sendCoinNews = async (messageText, coinmarketcalApi) => {
   }
 };
 
-const sendStartMessage = () => 'Enter a coin symbol to get its news. For example: BCH';
+const startMessage = 'Enter a coin symbol to get its news. For example: BCH';
 
-const sendAboutMessage = () => `v${version}. Created by Nishanth Vijayan.
+const aboutMessage = `v${version}. Created by Nishanth Vijayan.
     \nThis bot is open-source. You'll find its source code at:
     \nhttps://github.com/nishanthvijayan/CryptoEvents-TelegramBot
     \nIf you found this bot useful, don't forget to star the project :)
     \nPlease direct your complaints & feedback to nishanthvijayan1995@gmail.com
   `;
 
-const initializeResponseHandler = coinmarketcalApi => (messageText) => {
+const initializeResponseHandler = coinmarketcalApi => async (messageText) => {
   if (messageText.startsWith('/start')) {
-    sendStartMessage();
-  } else if (messageText.startsWith('/')) {
-    sendAboutMessage();
+    return startMessage;
   } else if (messageText.startsWith('/about')) {
-    sendAboutMessage();
-  } else {
-    sendCoinNews(messageText, coinmarketcalApi);
+    return aboutMessage;
   }
+
+  return getCoinNews(messageText, coinmarketcalApi);
 };
 
 module.exports = {
