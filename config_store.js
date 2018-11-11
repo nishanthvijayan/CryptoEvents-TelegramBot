@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB({ region: 'us-east-1', apiVersion: '2012-08-10' });
 const CONFIG_TABLE_NAME = 'crypto-bot-config';
 
-class Cache {
+class ConfigStore {
   static get(key) {
     const params = {
       TableName: CONFIG_TABLE_NAME,
@@ -45,10 +45,10 @@ class Cache {
     };
 
     return dynamodb.deleteItem(params).promise()
-    .then(data => console.log(data), error => console.log(error));
+      .then(data => console.log(data), error => console.log(error));
   }
 }
 
 module.exports = {
-  Cache,
+  ConfigStore,
 };
