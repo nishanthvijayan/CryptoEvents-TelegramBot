@@ -12,7 +12,11 @@ class Cache {
       },
     };
 
-    return dynamodb.getItem(params).promise;
+    return dynamodb.getItem(params).promise()
+      .then(data => data.Item.key.S, (error) => {
+        console.log(error);
+        return null;
+      });
   }
 
   static put(key, value) {
@@ -28,7 +32,8 @@ class Cache {
       TableName: CONFIG_TABLE_NAME,
     };
 
-    return dynamodb.putItem(params).promise;
+    return dynamodb.putItem(params).promise()
+      .then(data => console.log(data), error => console.log(error));
   }
 
   static del(key) {
@@ -39,7 +44,8 @@ class Cache {
       },
     };
 
-    return dynamodb.deleteItem(params).promise;
+    return dynamodb.deleteItem(params).promise()
+    .then(data => console.log(data), error => console.log(error));
   }
 }
 
