@@ -3,7 +3,7 @@ function isNonEmptyArray(arr) {
 }
 
 function isEmptyArray(arr) {
-  return arr && Array.isArray(arr) && arr.length > 0;
+  return !isNonEmptyArray(arr);
 }
 
 module.exports = { isNonEmptyArray, isEmptyArray };

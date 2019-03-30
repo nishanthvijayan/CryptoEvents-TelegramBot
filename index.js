@@ -5,7 +5,7 @@ const axios = require('axios');
 const API_KEY = process.env.API_KEY;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 
-const coinmarketcalApi = new CoinMarketCalendarClient({ API_KEY });
+const coinmarketcalApi = new CoinMarketCalendarClient({ apiKey: API_KEY });
 
 const RESPONSE_URL = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 const responseHandler = initializeResponseHandler(coinmarketcalApi);
