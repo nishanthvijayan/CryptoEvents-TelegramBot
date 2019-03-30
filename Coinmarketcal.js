@@ -2,11 +2,10 @@
 
 const axios = require('axios');
 const coinsList = require('./coins.json');
-const { isNonEmptyArray } = require('./utils');
+const { isNonEmptyArray, isEmptyArray } = require('./utils');
 
 module.exports = class CoinMarketCalendarClient {
   constructor({ apiKey }) {
-
     this.defaultHeaders = {
       'x-api-key': apiKey,
       'Accept-Encoding': 'deflate, gzip',
@@ -57,7 +56,7 @@ module.exports = class CoinMarketCalendarClient {
   }
 
   async getCoinIdsFromSymbols(coinSymbols) {
-    if (!isNonEmptyArray(coinSymbols)) {
+    if (isEmptyArray(coinSymbols)) {
       return [];
     }
 

@@ -2,8 +2,8 @@ const CoinMarketCalendarClient = require('./Coinmarketcal');
 const { initializeResponseHandler } = require('./bot');
 const axios = require('axios');
 
-const API_KEY = process.env.API_KEY
-const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN
+const API_KEY = process.env.API_KEY;
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 
 const coinmarketcalApi = new CoinMarketCalendarClient({ API_KEY });
 

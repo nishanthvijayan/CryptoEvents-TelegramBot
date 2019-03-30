@@ -1,10 +1,10 @@
 const { version } = require('./package.json');
-const { isNonEmptyArray } = require('./utils');
+const { isEmptyArray } = require('./utils');
 
 const formatEventText = (event) => {
   const {
     title: {
-      en: englishTitle
+      en: englishTitle,
     },
   } = event;
 
@@ -32,15 +32,14 @@ const getCoinNews = async (messageText, coinmarketcalApi) => {
       coins: coinIds,
     });
 
-    if (isNonEmptyArray(events)) {
-
-      const returnMessage = `Events & News related to ${coinIds.join(', ')}
-      \n${events.map(formatEventText).join('\n')}`;
-
-      return returnMessage;
-    } else {
+    if (isEmptyArray(events)) {
       return `No events found for ${coinIds.join(', ')}`;
     }
+
+    const returnMessage = `Events & News related to ${coinIds.join(', ')}
+      \n${events.map(formatEventText).join('\n')}`;
+
+    return returnMessage;
   } catch (e) {
     console.log(e);
     return 'Something went wrong';
