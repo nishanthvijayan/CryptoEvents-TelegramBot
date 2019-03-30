@@ -2,92 +2,62 @@
 
 const axios = require('axios');
 const coinsList = require('./coins.json');
-const categoriesList = require('./categories.json');
-const { ConfigStore } = require('./config_store');
+const { isNonEmptyArray } = require('./utils');
 
 module.exports = class CoinMarketCalendarClient {
-  constructor({ clientId, clientSecret }) {
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
-    this.accessToken = null;
+  constructor({ apiKey }) {
+
+    this.defaultHeaders = {
+      'x-api-key': apiKey,
+      'Accept-Encoding': 'deflate, gzip',
+      Accept: 'application/json',
+    };
   }
 
-
-  async authenticate() {
-    const cachedAccessToken = await ConfigStore.get('access_token');
-    if (cachedAccessToken) {
-      this.accessToken = cachedAccessToken;
-      return;
-    }
-
-    const authUrl = 'https://api.coinmarketcal.com/oauth/v2/token';
-
-    try {
-      const authResponse = await axios(authUrl, {
-        params: {
-          grant_type: 'client_credentials',
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
-        },
-      });
-
-      if (authResponse.data && authResponse.data.access_token) {
-        this.accessToken = authResponse.data.access_token;
-        await ConfigStore.put('access_token', this.accessToken);
-      }
-    } catch (e) {
-      if (e.response && e.response.status === 400) {
-        console.log('Something went wrong. Check if your client credentials are correct');
-      } else if (e.code === 'ENOTFOUND') {
-        console.log('Unable to connect to server. Check your internet connection');
-      } else {
-        console.log(e);
-      }
+  handleAPIError(e) {
+    if (e.response && e.response.status === 403) {
+      console.log('Authentication failed. Invalid API Key.');
+    } else if (e.response && e.response.status === 429) {
+      console.log('API usage quota exceeded');
+    } else if (e.code === 'ENOTFOUND') {
+      console.log('Unable to connect to server. Check your internet connection');
+    } else {
+      console.log(e);
     }
   }
 
   async getEvents({
     page = 1, max = 150, coins, categories,
   }) {
-    const eventsUrl = 'https://api.coinmarketcal.com/v1/events';
+    const eventsUrl = 'https://developers.coinmarketcal.com/v1/events';
 
-    if (this.accessToken == null) {
-      await this.authenticate();
-    }
+    const params = { page, max };
 
-    const params = { access_token: this.accessToken, page, max };
-
-    if (coins) {
+    if (isNonEmptyArray(coins)) {
       params.coins = coins.join(',');
     }
 
-    if (categories) {
+    if (isNonEmptyArray(categories)) {
       params.categories = categories.join(',');
     }
 
     try {
-      const eventsResponse = await axios(eventsUrl, { params });
+      const eventsResponse = await axios(eventsUrl, { params, headers: this.defaultHeaders });
 
-      if (eventsResponse.data) {
-        return eventsResponse.data;
+      if (eventsResponse.data == null) {
+        throw Error('Invalid response, Response did not contain body key');
       }
+
+      return eventsResponse.data.body || [];
     } catch (e) {
-      if (e.response && e.response.status === 401) {
-        console.log('Authentication failed. Try again.');
-        this.accessToken = null;
-        await ConfigStore.del('access_token');
-      } else if (e.code === 'ENOTFOUND') {
-        console.log('Unable to connect to server. Check your internet connection');
-      } else {
-        console.log(e);
-      }
+      this.handleAPIError(e);
     }
 
     return null;
   }
 
   async getCoinIdsFromSymbols(coinSymbols) {
-    if (coinSymbols == null || !Array.isArray(coinSymbols) || coinSymbols.length === 0) {
+    if (!isNonEmptyArray(coinSymbols)) {
       return [];
     }
 

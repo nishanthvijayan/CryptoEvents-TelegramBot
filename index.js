@@ -3,16 +3,12 @@ const { initializeResponseHandler } = require('./bot');
 const axios = require('axios');
 
 const {
-  clientId,
-  clientSecret,
+  apiKey,
   telegramToken,
 } = require('./secrets.json');
 
 
-const coinmarketcalApi = new CoinMarketCalendarClient({
-  clientId,
-  clientSecret,
-});
+const coinmarketcalApi = new CoinMarketCalendarClient({ apiKey });
 
 const RESPONSE_URL = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
 const responseHandler = initializeResponseHandler(coinmarketcalApi);

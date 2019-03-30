@@ -1,9 +1,11 @@
 const { version } = require('./package.json');
+const { isNonEmptyArray } = require('./utils');
 
 const formatEventText = (event) => {
   const {
-    title,
-    description,
+    title: {
+      en: englishTitle
+    },
   } = event;
 
   const date = new Date(event.date_event).toLocaleDateString('en-US', {
@@ -14,8 +16,7 @@ const formatEventText = (event) => {
   });
 
   return `${date}\n${
-    title}\n${
-    description}\n`;
+    englishTitle}\n`;
 };
 
 const getCoinNews = async (messageText, coinmarketcalApi) => {
@@ -31,14 +32,15 @@ const getCoinNews = async (messageText, coinmarketcalApi) => {
       coins: coinIds,
     });
 
-    if (!events || !Array.isArray(events) || events.length < 1) {
+    if (isNonEmptyArray(events)) {
+
+      const returnMessage = `Events & News related to ${coinIds.join(', ')}
+      \n${events.map(formatEventText).join('\n')}`;
+
+      return returnMessage;
+    } else {
       return `No events found for ${coinIds.join(', ')}`;
     }
-
-    const returnMessage = `Events & News related to ${coinIds.join(', ')}
-    \n${events.map(formatEventText).join('\n')}`;
-
-    return returnMessage;
   } catch (e) {
     console.log(e);
     return 'Something went wrong';
